@@ -3,7 +3,7 @@
 Web app to create drawer front labels for a trading card catalog. Labels are **MTG card size** (2.5″ × 3.5″) at **300 DPI** so you can print them and use **Print then Cut** in Cricut Design Studio (or print on cardstock and trim).
 
 - Pick an icon from **mana/ability symbols** via **[Mana](https://github.com/andrewgioia/mana)** (curated list; SVGs from jsDelivr CDN).
-- Label text uses **Mplantin** from [mtg-font](https://github.com/AlexandreArpin/mtg-font) (MIT).
+- Label text uses **Beleren2016 Small Caps Bold** (local font in `public/fonts/`).
 - Live preview and one-click **Download PNG**.
 
 ## Run locally
@@ -31,11 +31,16 @@ Unit tests cover constants (card dimensions, DPI), the icon set, layout math (ic
 - Canvas API for layout and PNG export
 - No backend; everything runs in the browser
 
+## Fonts
+
+Label text uses **Beleren2016 Small Caps Bold** from `public/fonts/Beleren2016SmallCaps-Bold.ttf`. **TTF** is supported in all modern browsers. For smaller file size and slightly better performance, you can add **WOFF2** (e.g. convert with [CloudConvert](https://cloudconvert.com/ttf-to-woff2) or [fonttools](https://github.com/fonttools/fonttools)) and add a second `src` in `src/fonts.css`:
+
+```css
+src: url('/fonts/Beleren2016SmallCaps-Bold.woff2') format('woff2'),
+     url('/fonts/Beleren2016SmallCaps-Bold.ttf') format('truetype');
+```
+
 ## Credits
 
-This app uses the following third-party resources:
-
-- **[mtg-font](https://github.com/AlexandreArpin/mtg-font)** by Alexandre Arpin — Mplantin font for label text. [MIT License](https://github.com/AlexandreArpin/mtg-font/blob/master/LICENSE).
+- **Label font:** Beleren2016 Small Caps Bold (local).
 - **[Mana](https://github.com/andrewgioia/mana)** by Andrew Gioia — SVG mana symbols (W, U, B, R, G, colorless, color pie) loaded via [jsDelivr](https://www.jsdelivr.com/) CDN.
-
-Both are loaded from CDN at runtime; no assets are bundled. The app footer also displays these credits.

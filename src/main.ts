@@ -1,5 +1,6 @@
+import './fonts.css'
 import './style.css'
-import { CARD_WIDTH_PX, CARD_HEIGHT_PX } from './constants'
+import { CARD_WIDTH_PX, CARD_HEIGHT_PX, EXPORT_DPI_OPTIONS } from './constants'
 import { ICON_IDS, getIconUrl, type IconId } from './icons'
 import type { CardOptions } from './card'
 import { renderCardToBlob, downloadCard, drawCardPreview } from './card'
@@ -15,6 +16,8 @@ let state: CardOptions = {
   line3: '',
   showLine2: true,
   showLine3: true,
+  showBorder: false,
+  exportDpi: 300,
 }
 
 function getEl<T extends HTMLElement>(id: string): T {
@@ -23,11 +26,24 @@ function getEl<T extends HTMLElement>(id: string): T {
   return el as T
 }
 
+let previewRenderId = 0
+
+function setPreviewLoading(loading: boolean) {
+  const overlay = document.getElementById('preview-loading')
+  if (overlay) overlay.classList.toggle('visible', loading)
+}
+
 function renderPreview() {
   const canvas = getEl<HTMLCanvasElement>('preview')
   canvas.width = previewWidth
   canvas.height = previewHeight
-  drawCardPreview(canvas, getDisplayOptions()).catch(console.error)
+  const id = ++previewRenderId
+  setPreviewLoading(true)
+  drawCardPreview(canvas, getDisplayOptions())
+    .catch(console.error)
+    .finally(() => {
+      if (id === previewRenderId) setPreviewLoading(false)
+    })
 }
 
 function setupIconPicker() {
@@ -67,6 +83,7 @@ function getDisplayOptions(): CardOptions {
     line3: state.line3 || LINE_PLACEHOLDERS[3],
     showLine2: state.showLine2,
     showLine3: state.showLine3,
+    showBorder: state.showBorder,
   }
 }
 
@@ -112,10 +129,30 @@ function setupTextInputs() {
   })
 }
 
+function setupBorderToggle() {
+  const showBorder = getEl<HTMLInputElement>('show-border')
+  showBorder.checked = state.showBorder === true
+  showBorder.addEventListener('change', () => {
+    state.showBorder = showBorder.checked
+    renderPreview()
+  })
+}
+
+function setupDpiSelect() {
+  const select = getEl<HTMLSelectElement>('export-dpi')
+  select.value = String(state.exportDpi ?? 300)
+  select.addEventListener('change', () => {
+    state.exportDpi = Number(select.value) as 300 | 600
+  })
+}
+
 function setupDownload() {
   const btn = getEl<HTMLButtonElement>('download-btn')
+  const label = btn.dataset.label ?? 'Download PNG'
+  const loadingText = btn.dataset.loading ?? 'Generating…'
   btn.addEventListener('click', async () => {
     btn.disabled = true
+    btn.textContent = loadingText
     try {
       const blob = await renderCardToBlob(state)
       const name = [state.line1 || 'label', state.iconId].filter(Boolean).join('-').replace(/\s+/g, '-') || 'drawer-label'
@@ -124,6 +161,7 @@ function setupDownload() {
       console.error(e)
     } finally {
       btn.disabled = false
+      btn.textContent = label
     }
   })
 }
@@ -131,6 +169,7 @@ function setupDownload() {
 function init() {
   const app = getEl('app')
   app.innerHTML = `
+    <span aria-hidden="true" style="position:absolute;left:-9999px;font:700 1px &quot;Beleren2016 Small Caps&quot;,serif">.</span>
     <header class="header">
       <h1>Drawer Label Maker</h1>
       <p class="subtitle">MTG-size labels for BCW catalog · 2.5″ × 3.5″ @ 300 DPI</p>
@@ -159,23 +198,43 @@ function init() {
             <input type="text" id="line3" class="text-input" maxlength="32" />
           </div>
         </fieldset>
-        <button type="button" id="download-btn" class="download-btn">Download PNG</button>
+        <div class="border-toggle-row">
+          <label class="line-toggle">
+            <input type="checkbox" id="show-border" />
+            <span>Show border</span>
+          </label>
+        </div>
+        <div class="dpi-row">
+          <label for="export-dpi">Export resolution</label>
+          <select id="export-dpi" class="dpi-select" aria-describedby="export-dpi-desc">
+            ${EXPORT_DPI_OPTIONS.map((dpi) => `<option value="${dpi}">${dpi} DPI</option>`).join('')}
+          </select>
+          <span id="export-dpi-desc" class="dpi-desc">Higher DPI = larger file, sharper print.</span>
+        </div>
+        <button type="button" id="download-btn" class="download-btn" data-label="Download PNG" data-loading="Generating…">Download PNG</button>
       </section>
       <section class="preview-section">
         <p class="preview-label">Preview</p>
-        <canvas id="preview" class="preview-canvas" width="${previewWidth}" height="${previewHeight}"></canvas>
+        <div class="preview-wrap">
+          <canvas id="preview" class="preview-canvas" width="${previewWidth}" height="${previewHeight}"></canvas>
+          <div id="preview-loading" class="preview-loading" aria-live="polite">
+            <span class="preview-loading-spinner" aria-hidden="true"></span>
+            <span>Loading…</span>
+          </div>
+        </div>
       </section>
     </main>
     <footer class="credits">
       <p class="credits-title">Credits</p>
       <ul class="credits-list">
-        <li><strong>Label font (Mplantin):</strong> <a href="https://github.com/AlexandreArpin/mtg-font" target="_blank" rel="noopener noreferrer">mtg-font</a> by Alexandre Arpin (MIT).</li>
         <li><strong>Mana symbols (icons):</strong> <a href="https://github.com/andrewgioia/mana" target="_blank" rel="noopener noreferrer">Mana</a> by Andrew Gioia.</li>
       </ul>
     </footer>
   `
   setupIconPicker()
   setupTextInputs()
+  setupBorderToggle()
+  setupDpiSelect()
   setupDownload()
   renderPreview()
 }

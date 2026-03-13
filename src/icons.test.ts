@@ -26,7 +26,7 @@ describe('icons', () => {
     const iconKeys = new Set(Object.keys(ICONS))
     const idsSet = new Set(ICON_IDS)
     for (const key of iconKeys) {
-      expect(idsSet.has(key)).toBe(true)
+      expect(idsSet.has(key as IconId)).toBe(true)
     }
   })
 })

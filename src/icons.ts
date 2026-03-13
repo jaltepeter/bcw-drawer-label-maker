@@ -17,5 +17,5 @@ export function getIconUrl(id: IconId): string {
 
 /** For tests: ICONS[id] is the URL. */
 export const ICONS: Record<string, string> = Object.fromEntries(
-  ICON_IDS.map((id) => [id, getIconUrl(id)])
+  ICON_IDS.map((id) => [id, getIconUrl(id as IconId)])
 )

@@ -1,4 +1,4 @@
-import { CARD_WIDTH_PX, CARD_HEIGHT_PX } from './constants'
+import { CARD_WIDTH_PX, getExportDimensions } from './constants'
 import { getIconUrl, type IconId } from './icons'
 import { getCardLayout } from './layout'
 
@@ -9,6 +9,9 @@ export interface CardOptions {
   line3: string
   showLine2?: boolean
   showLine3?: boolean
+  showBorder?: boolean
+  /** Export resolution (DPI). Default 300. */
+  exportDpi?: number
 }
 
 /** Load an SVG string as an Image for drawing on canvas. */
@@ -45,14 +48,15 @@ async function loadSvgFromUrl(url: string): Promise<HTMLImageElement> {
   return loadSvgAsImage(svgText)
 }
 
-/** Wait for MTG text font (Mplantin) to be loaded. */
-function waitForFonts(): Promise<void> {
-  if (document.fonts?.ready) return document.fonts.ready.then(() => {})
-  return Promise.resolve()
+/** Force the label font to load so canvas can use it (browsers don't load @font-face until used in DOM). */
+async function waitForFonts(): Promise<void> {
+  if (!document.fonts?.load) return
+  await document.fonts.load('700 1em "Beleren2016 Small Caps"')
+  await document.fonts.ready
 }
 
 const fontSize = 84
-const textFontFamily = 'Mplantin, serif'
+const textFontFamily = '"Beleren2016 Small Caps", serif'
 
 /** Draw card layout into a context (for preview or export). Scale 1 = 750×1050. */
 async function drawCard(
@@ -113,17 +117,27 @@ async function drawCard(
     ctx.fillText(line, width / 2, lineY, contentWidth)
     lineY += layout.lineHeight
   }
+
+  if (options.showBorder) {
+    const borderWidth = Math.max(1, 3 * s)
+    const half = borderWidth / 2
+    ctx.strokeStyle = '#000'
+    ctx.lineWidth = borderWidth
+    ctx.strokeRect(half, half, width - borderWidth, height - borderWidth)
+  }
 }
 
-/** Create an offscreen canvas, draw the card, return as PNG blob (300 DPI export). */
+/** Create an offscreen canvas, draw the card, return as PNG blob. */
 export async function renderCardToBlob(options: CardOptions): Promise<Blob> {
+  const dpi = options.exportDpi ?? 300
+  const { width, height } = getExportDimensions(dpi)
   const canvas = document.createElement('canvas')
-  canvas.width = CARD_WIDTH_PX
-  canvas.height = CARD_HEIGHT_PX
+  canvas.width = width
+  canvas.height = height
   const ctx = canvas.getContext('2d')
   if (!ctx) throw new Error('Canvas 2d not available')
-  const scale = 1
-  await drawCard(ctx, CARD_WIDTH_PX, CARD_HEIGHT_PX, options, scale)
+  const scale = width / CARD_WIDTH_PX
+  await drawCard(ctx, width, height, options, scale)
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error('toBlob failed'))),
