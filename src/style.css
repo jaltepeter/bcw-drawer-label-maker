@@ -340,6 +340,12 @@ body {
   color: #71717a;
 }
 
+.credits-version {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.6875rem;
+  color: #71717a;
+}
+
 .credits-title {
   margin: 0 0 0.5rem 0;
   font-weight: 600;

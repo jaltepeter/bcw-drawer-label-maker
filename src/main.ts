@@ -267,6 +267,7 @@ function init() {
       <p class="lightbox-hint">Click outside or press Escape to close</p>
     </div>
     <footer class="credits">
+      <p class="credits-version" aria-label="App version">v${__APP_VERSION__}${__GIT_SHA__ ? ` · ${__GIT_SHA__}` : ''}</p>
       <p class="credits-title">Credits</p>
       <ul class="credits-list">
         <li><strong>Mana symbols (icons):</strong> <a href="https://github.com/andrewgioia/mana" target="_blank" rel="noopener noreferrer">Mana</a> by Andrew Gioia.</li>
