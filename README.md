@@ -8,12 +8,30 @@ Web app to create drawer front labels for a trading card catalog. Labels are **M
 
 ## Run locally
 
+**Development (with hot reload):**
+
 ```bash
 npm install
 npm run dev
 ```
 
 Open the URL shown (e.g. http://localhost:5173). Use **Download PNG** to save a 750×1050 px image for Cricut/printing.
+
+**Build for production:**
+
+```bash
+npm run build
+```
+
+Output is in `dist/`. Serve that folder with any static host, or use `npm run preview` to preview the production build locally.
+
+**Run with Docker:**
+
+```bash
+docker compose up --build
+```
+
+Then open http://localhost:8080. The image builds the Vite app and serves it with nginx.
 
 ## Tests
 
