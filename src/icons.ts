@@ -5,7 +5,7 @@
 const MANA_CDN = 'https://cdn.jsdelivr.net/gh/andrewgioia/mana@master/svg'
 
 /** The 5 color mana symbols plus colorless and color pie. */
-const SYMBOL_IDS = ['w', 'u', 'b', 'r', 'g', 'c', 'watermark-colorpie'] as const
+const SYMBOL_IDS = ['w', 'u', 'b', 'r', 'g', 'c', 'watermark-colorpie', 'watermark-mtg' ] as const
 
 export type IconId = (typeof SYMBOL_IDS)[number]
 export const ICON_IDS = [...SYMBOL_IDS]

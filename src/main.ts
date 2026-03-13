@@ -9,6 +9,11 @@ const PREVIEW_SCALE = 0.3
 const previewWidth = Math.round(CARD_WIDTH_PX * PREVIEW_SCALE)
 const previewHeight = Math.round(CARD_HEIGHT_PX * PREVIEW_SCALE)
 
+/** Scale for the lightbox (larger view when preview is clicked). */
+const LIGHTBOX_SCALE = 0.67
+const lightboxWidth = Math.round(CARD_WIDTH_PX * LIGHTBOX_SCALE)
+const lightboxHeight = Math.round(CARD_HEIGHT_PX * LIGHTBOX_SCALE)
+
 let state: CardOptions = {
   iconId: 'w',
   line1: '',
@@ -44,6 +49,38 @@ function renderPreview() {
     .finally(() => {
       if (id === previewRenderId) setPreviewLoading(false)
     })
+}
+
+function openLightbox() {
+  const modal = getEl('preview-lightbox')
+  const canvas = getEl<HTMLCanvasElement>('lightbox-canvas')
+  canvas.width = lightboxWidth
+  canvas.height = lightboxHeight
+  modal.classList.add('visible')
+  drawCardPreview(canvas, getDisplayOptions()).catch(console.error)
+}
+
+function closeLightbox() {
+  getEl('preview-lightbox').classList.remove('visible')
+}
+
+function setupPreviewLightbox() {
+  const wrap = getEl('preview-wrap')
+  wrap.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('.preview-loading')) return
+    openLightbox()
+  })
+  wrap.style.cursor = 'pointer'
+  wrap.title = 'Click to view larger'
+
+  const modal = getEl('preview-lightbox')
+  modal.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('.lightbox-canvas')) return
+    closeLightbox()
+  })
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox()
+  })
 }
 
 function setupIconPicker() {
@@ -215,7 +252,7 @@ function init() {
       </section>
       <section class="preview-section">
         <p class="preview-label">Preview</p>
-        <div class="preview-wrap">
+        <div id="preview-wrap" class="preview-wrap">
           <canvas id="preview" class="preview-canvas" width="${previewWidth}" height="${previewHeight}"></canvas>
           <div id="preview-loading" class="preview-loading" aria-live="polite">
             <span class="preview-loading-spinner" aria-hidden="true"></span>
@@ -224,6 +261,11 @@ function init() {
         </div>
       </section>
     </main>
+    <div id="preview-lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Preview (larger)" tabindex="-1">
+      <div class="lightbox-backdrop"></div>
+      <canvas id="lightbox-canvas" class="lightbox-canvas" width="${lightboxWidth}" height="${lightboxHeight}"></canvas>
+      <p class="lightbox-hint">Click outside or press Escape to close</p>
+    </div>
     <footer class="credits">
       <p class="credits-title">Credits</p>
       <ul class="credits-list">
@@ -236,6 +278,7 @@ function init() {
   setupBorderToggle()
   setupDpiSelect()
   setupDownload()
+  setupPreviewLightbox()
   renderPreview()
 }
 
