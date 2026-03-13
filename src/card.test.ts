@@ -70,7 +70,7 @@ describe('renderCardToBlob', () => {
 
   it('draws border when showBorder is true', async () => {
     const mockCanvas = makeMockCanvas()
-    const ctx = mockCanvas.getContext('2d') as { strokeRect: ReturnType<typeof vi.fn> }
+    const ctx = mockCanvas.getContext('2d') as unknown as { strokeRect: ReturnType<typeof vi.fn> }
     vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
       if (tagName.toLowerCase() === 'canvas') return mockCanvas
       return document.createElement(tagName as keyof HTMLElementTagNameMap)
