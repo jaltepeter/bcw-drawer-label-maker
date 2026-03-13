@@ -18,13 +18,11 @@ jobs:
 
       - name: Get version (GitVersion)
         id: gitversion
-        uses: gittools/actions/gitversion/execute@v0.4.0
-        with:
-          useConfigFile: false
+        uses: gittools/actions/gitversion/execute@v4.3.3
 
       - name: Set version env
         run: |
-          echo "VITE_APP_VERSION=${{ steps.gitversion.outputs.SemVer }}" >> $GITHUB_ENV
+          echo "VITE_APP_VERSION=${{ steps.gitversion.outputs.GitVersion_SemVer }}" >> $GITHUB_ENV
           echo "VITE_GIT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
 
       - name: Set up Node.js
