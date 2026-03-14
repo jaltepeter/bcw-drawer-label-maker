@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderCardToBlob, downloadCard } from './card'
 import type { CardOptions } from './card'
-import { CARD_WIDTH_PX } from './constants'
+import { CARD_WIDTH_PX, CARD_HEIGHT_PX } from './constants'
 
 function makeMockCanvas(): HTMLCanvasElement {
   const mockToBlob = vi.fn((callback: (blob: Blob) => void) => {
@@ -28,7 +28,7 @@ function makeMockCanvas(): HTMLCanvasElement {
   }
   return {
     width: CARD_WIDTH_PX,
-    height: 1050,
+    height: CARD_HEIGHT_PX,
     getContext: vi.fn((_: string) => mockCtx),
     toBlob: mockToBlob,
   } as unknown as HTMLCanvasElement

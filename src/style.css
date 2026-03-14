@@ -289,29 +289,6 @@ body {
   cursor: not-allowed;
 }
 
-.download-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.download-btn-secondary {
-  background: transparent;
-  color: #e4e4e7;
-  border: 1px solid #3f3f46;
-}
-
-.download-btn-secondary:hover:not(:disabled) {
-  background: #27272a;
-  border-color: #52525b;
-}
-
-.download-svg-hint {
-  margin: 0.5rem 0 0;
-  font-size: 0.75rem;
-  color: #71717a;
-}
-
 .preview-section {
   display: flex;
   flex-direction: column;

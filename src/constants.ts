@@ -1,6 +1,12 @@
-// MTG card size: 2.5" × 3.5" (standard poker / top-loader size)
-export const CARD_WIDTH_IN = 2.5
-export const CARD_HEIGHT_IN = 3.5
+// Top-loader insert size: 2.68" × 3.58" (fits centered in a toploader)
+export const CARD_WIDTH_IN = 2.68
+export const CARD_HEIGHT_IN = 3.58
+
+/** Max size of the icon in the icon area (inches); scales with canvas. */
+export const MAX_ICON_SIZE_IN = 1.81
+
+/** Distance from the bottom of the card to the bottom of the (square) icon, in inches. */
+export const ICON_BOTTOM_MARGIN_IN = 1.6
 
 /** Default/reference DPI; layout is designed at this resolution. */
 export const DPI = 300

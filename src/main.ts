@@ -3,7 +3,7 @@ import './style.css'
 import { CARD_WIDTH_PX, CARD_HEIGHT_PX, EXPORT_DPI_OPTIONS } from './constants'
 import { ICON_IDS, getIconUrl, type IconId } from './icons'
 import type { CardOptions } from './card'
-import { renderCardToBlob, downloadCard, drawCardPreview, renderCardToSvg, downloadSvg } from './card'
+import { renderCardToBlob, downloadCard, drawCardPreview } from './card'
 
 const PREVIEW_SCALE = 0.3
 const previewWidth = Math.round(CARD_WIDTH_PX * PREVIEW_SCALE)
@@ -251,24 +251,6 @@ function setupDownload() {
       btn.textContent = label
     }
   })
-
-  const svgBtn = getEl<HTMLButtonElement>('download-svg-btn')
-  const svgLabel = svgBtn.dataset.label ?? 'Download SVG'
-  const svgLoadingText = svgBtn.dataset.loading ?? 'Generating…'
-  svgBtn.addEventListener('click', async () => {
-    svgBtn.disabled = true
-    svgBtn.textContent = svgLoadingText
-    try {
-      const svg = await renderCardToSvg(getDisplayOptions())
-      const name = [state.line1 || 'label', state.iconId].filter(Boolean).join('-').replace(/\s+/g, '-') || 'drawer-label'
-      downloadSvg(svg, `${name}.svg`)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      svgBtn.disabled = false
-      svgBtn.textContent = svgLabel
-    }
-  })
 }
 
 function init() {
@@ -277,7 +259,7 @@ function init() {
     <span aria-hidden="true" style="position:absolute;left:-9999px;font:700 1px &quot;Beleren2016 Small Caps&quot;,serif">.</span>
     <header class="header">
       <h1>Drawer Label Maker</h1>
-      <p class="subtitle">MTG-size labels for BCW catalog · 2.5″ × 3.5″ @ 300 DPI</p>
+      <p class="subtitle">Toploader insert labels for BCW catalog · 2.68″ × 3.58″ @ 300 DPI</p>
     </header>
     <main class="main">
       <section class="controls">
@@ -333,11 +315,7 @@ function init() {
           </select>
           <span id="export-dpi-desc" class="dpi-desc">Higher DPI = larger file, sharper print.</span>
         </div>
-        <div class="download-buttons">
-          <button type="button" id="download-btn" class="download-btn" data-label="Download PNG" data-loading="Generating…">Download PNG</button>
-          <button type="button" id="download-svg-btn" class="download-btn download-btn-secondary" data-label="Download SVG" data-loading="Generating…">Download SVG</button>
-        </div>
-        <p class="download-svg-hint">SVG keeps exact size and whitespace for Cricut.</p>
+        <button type="button" id="download-btn" class="download-btn" data-label="Download PNG" data-loading="Generating…">Download PNG</button>
       </section>
       <section class="preview-section">
         <p class="preview-label">Preview</p>

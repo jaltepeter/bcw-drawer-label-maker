@@ -1,13 +1,6 @@
-import {
-  CARD_WIDTH_PX,
-  CARD_HEIGHT_PX,
-  BORDER_RADIUS_MM,
-  CARD_WIDTH_IN,
-  CARD_HEIGHT_IN,
-  getExportDimensions,
-} from './constants'
+import { CARD_WIDTH_PX, BORDER_RADIUS_MM, CARD_WIDTH_IN, getExportDimensions } from './constants'
 import { getIconUrl, type IconId } from './icons'
-import { getCardLayout, type CardLayout } from './layout'
+import { getCardLayout } from './layout'
 
 export interface CardOptions {
   iconId: IconId | null
@@ -63,88 +56,6 @@ async function loadSvgFromUrl(url: string, color: string): Promise<HTMLImageElem
   return loadSvgAsImage(svgText)
 }
 
-/** Fetch icon SVG and return inner content + viewBox size for embedding in card SVG. */
-async function fetchIconSvgForEmbed(
-  url: string,
-  color: string
-): Promise<{ inner: string; viewBoxSize: number }> {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`Failed to fetch icon: ${res.status}`)
-  let svgText = await res.text()
-  svgText = svgToColor(svgText, color)
-  const viewBoxMatch = svgText.match(/viewBox=["']([^"']+)["']/i)
-  let viewBoxSize = 100
-  if (viewBoxMatch) {
-    const parts = viewBoxMatch[1].trim().split(/\s+/)
-    if (parts.length >= 4) viewBoxSize = Math.max(1, (Number(parts[2]) + Number(parts[3])) / 2)
-  }
-  const inner = svgText
-    .replace(/<svg[^>]*>/i, '')
-    .replace(/<\/svg>\s*$/i, '')
-    .trim()
-  return { inner, viewBoxSize }
-}
-
-interface TextLineSpec {
-  text: string
-  fontSize: number
-  y: number
-  color: string
-}
-
-/** Compute text line specs (font size, y) for SVG export using same logic as canvas. */
-function getTextLineSpecs(
-  options: CardOptions,
-  layout: CardLayout,
-  ctx: CanvasRenderingContext2D
-): TextLineSpec[] {
-  const show2 = options.showLine2 !== false
-  const show3 = options.showLine3 !== false
-  const lines = [
-    options.line1,
-    show2 ? options.line2 : null,
-    show3 ? options.line3 : null,
-  ].filter(Boolean) as string[]
-  const lineColors = [
-    options.line1Color ?? '#000000',
-    options.line2Color ?? '#000000',
-    options.line3Color ?? '#000000',
-  ]
-  const height = CARD_HEIGHT_PX
-  const textAreaTop = layout.textStartY
-  const textAreaBottom = height - layout.padding
-  const textAreaHeight = textAreaBottom - textAreaTop
-  const blockHeight = lines.length * layout.lineHeight
-  const startY = textAreaTop + (textAreaHeight - blockHeight) / 2
-  const contentWidth = layout.contentWidth
-  const specs: TextLineSpec[] = []
-  ctx.font = `600 ${fontSize}px ${textFontFamily}`
-  let lineY = startY
-  for (let i = 0; i < lines.length; i++) {
-    if (lineY + layout.lineHeight > textAreaBottom) break
-    const line = lines[i]
-    let font = fontSize
-    let metrics = ctx.measureText(line)
-    while (metrics.width > contentWidth && font > 16) {
-      font -= 2
-      ctx.font = `600 ${font}px ${textFontFamily}`
-      metrics = ctx.measureText(line)
-    }
-    specs.push({ text: escapeXml(line), fontSize: font, y: lineY, color: lineColors[i] ?? '#000000' })
-    lineY += layout.lineHeight
-  }
-  return specs
-}
-
-function escapeXml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;')
-}
-
 /** Force the label font to load so canvas can use it (browsers don't load @font-face until used in DOM). */
 async function waitForFonts(): Promise<void> {
   if (!document.fonts?.load) return
@@ -155,7 +66,7 @@ async function waitForFonts(): Promise<void> {
 const fontSize = 84
 const textFontFamily = '"Beleren2016 Small Caps", serif'
 
-/** Draw card layout into a context (for preview or export). Scale 1 = 750×1050. */
+/** Draw card layout into a context (for preview or export). Scale 1 = CARD_WIDTH_PX × CARD_HEIGHT_PX. */
 async function drawCard(
   ctx: CanvasRenderingContext2D,
   width: number,
@@ -198,7 +109,8 @@ async function drawCard(
     )
   }
 
-  const textAreaTop = layout.textStartY
+  // Text centered in the band from bottom of icon to bottom of card
+  const textAreaTop = layout.iconZoneHeight
   const textAreaBottom = height - layout.padding
   const textAreaHeight = textAreaBottom - textAreaTop
   const blockHeight = lines.length * layout.lineHeight
@@ -247,7 +159,50 @@ async function drawCard(
   }
 }
 
-/** Create an offscreen canvas, draw the card, return as PNG blob. */
+/** PNG CRC-32 (used for chunk checksum). */
+function pngCrc32(data: Uint8Array): number {
+  let crc = 0xffffffff
+  const table = new Uint32Array(256)
+  for (let n = 0; n < 256; n++) {
+    let c = n
+    for (let k = 0; k < 8; k++) c = (c & 1) ? 0xedb88320 ^ (c >>> 1) : c >>> 1
+    table[n] = c >>> 0
+  }
+  for (let i = 0; i < data.length; i++) crc = table[(crc ^ data[i]) & 0xff] ^ (crc >>> 8)
+  return (crc ^ 0xffffffff) >>> 0
+}
+
+/** Insert pHYs chunk (pixels per meter) so the PNG reports correct DPI when opened in Cricut/print software. */
+async function pngWithDpi(blob: Blob, dpi: number): Promise<Blob> {
+  const buf = await blob.arrayBuffer()
+  const arr = new Uint8Array(buf)
+  const signatureAndIhdrLen = 8 + 4 + 4 + 13 + 4 // signature + IHDR chunk (length+type+data+crc)
+  if (arr.length < signatureAndIhdrLen) return blob // too small (e.g. test mock), skip
+  const ppm = Math.round(dpi / 0.0254) // pixels per meter
+  const physData = new Uint8Array(9)
+  const view = new DataView(physData.buffer)
+  view.setUint32(0, ppm, false)
+  view.setUint32(4, ppm, false)
+  physData[8] = 1 // unit: meter
+  const chunkType = new TextEncoder().encode('pHYs')
+  const chunkPayload = new Uint8Array(4 + 9) // type + data
+  chunkPayload.set(chunkType, 0)
+  chunkPayload.set(physData, 4)
+  const crc = pngCrc32(chunkPayload)
+  const chunk = new Uint8Array(4 + 4 + 9 + 4) // length + type + data + crc
+  const chunkView = new DataView(chunk.buffer)
+  chunkView.setUint32(0, 9, false)
+  chunk.set(chunkType, 4)
+  chunk.set(physData, 8)
+  chunkView.setUint32(17, crc, false)
+  const out = new Uint8Array(signatureAndIhdrLen + chunk.length + arr.length - signatureAndIhdrLen)
+  out.set(arr.subarray(0, signatureAndIhdrLen), 0)
+  out.set(chunk, signatureAndIhdrLen)
+  out.set(arr.subarray(signatureAndIhdrLen), signatureAndIhdrLen + chunk.length)
+  return new Blob([out], { type: 'image/png' })
+}
+
+/** Create an offscreen canvas, draw the card, return as PNG blob with DPI set so physical size is exact. */
 export async function renderCardToBlob(options: CardOptions): Promise<Blob> {
   const dpi = options.exportDpi ?? 300
   const { width, height } = getExportDimensions(dpi)
@@ -258,13 +213,14 @@ export async function renderCardToBlob(options: CardOptions): Promise<Blob> {
   if (!ctx) throw new Error('Canvas 2d not available')
   const scale = width / CARD_WIDTH_PX
   await drawCard(ctx, width, height, options, scale)
-  return new Promise<Blob>((resolve, reject) => {
+  const rawBlob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error('toBlob failed'))),
       'image/png',
       1
     )
   })
+  return pngWithDpi(rawBlob, dpi)
 }
 
 /** Draw preview into an existing canvas (e.g. 225×315). */
@@ -280,95 +236,6 @@ export async function drawCardPreview(
 
 /** Trigger download of the card as a PNG file. */
 export function downloadCard(blob: Blob, filename = 'drawer-label.png') {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-/** Font path for embedding in SVG (same as fonts.css). */
-const FONT_URL_WOFF = '/fonts/Beleren2016SmallCaps-Bold.woff'
-
-/** Fetch font and return a data URL for embedding in SVG so the font renders exactly. */
-async function getEmbeddedFontDataUrl(): Promise<string> {
-  const res = await fetch(FONT_URL_WOFF)
-  if (!res.ok) throw new Error(`Failed to fetch font: ${res.status}`)
-  const blob = await res.blob()
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(new Error('Failed to read font'))
-    reader.readAsDataURL(blob)
-  })
-}
-
-/** Render the card as an SVG string (2.5" × 3.5" with viewBox). Preserves whitespace for Cricut. Embeds font so it renders exactly. */
-export async function renderCardToSvg(options: CardOptions): Promise<string> {
-  await waitForFonts()
-  const fontDataUrl = await getEmbeddedFontDataUrl()
-  const width = CARD_WIDTH_PX
-  const height = CARD_HEIGHT_PX
-  const layout = getCardLayout(width, height)
-  const borderWidth = 3
-  const half = borderWidth / 2
-  const radiusPx = (BORDER_RADIUS_MM / 25.4) * (width / CARD_WIDTH_IN)
-  const cardRadius = Math.min(radiusPx, width / 2, height / 2)
-  const radius = Math.min(radiusPx, (width - borderWidth) / 2, (height - borderWidth) / 2)
-
-  let iconGroup = ''
-  const hasIcon = options.iconId && getIconUrl(options.iconId as IconId)
-  const iconColor = options.iconColor ?? '#000000'
-  if (hasIcon && options.iconId) {
-    const url = getIconUrl(options.iconId as IconId)
-    const { inner, viewBoxSize } = await fetchIconSvgForEmbed(url, iconColor)
-    const scale = layout.iconSize / viewBoxSize
-    iconGroup = `<g transform="translate(${layout.iconX},${layout.iconY}) scale(${scale})">${inner}</g>`
-  }
-
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('Canvas 2d not available')
-  const textSpecs = getTextLineSpecs(options, layout, ctx)
-
-  const textEls = textSpecs
-    .map(
-      (s) =>
-        `<text x="${width / 2}" y="${s.y}" font-family="Beleren2016 Small Caps, serif" font-size="${s.fontSize}" font-weight="600" fill="${s.color}" text-anchor="middle" dominant-baseline="hanging">${s.text}</text>`
-    )
-    .join('\n    ')
-
-  const borderRect =
-    options.showBorder ?
-      `<rect x="${half}" y="${half}" width="${width - borderWidth}" height="${height - borderWidth}" rx="${radius}" ry="${radius}" fill="none" stroke="#000" stroke-width="${borderWidth}"/>`
-    : ''
-
-  const fontUrlEscaped = fontDataUrl.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${CARD_WIDTH_IN}in" height="${CARD_HEIGHT_IN}in">
-  <defs>
-    <style>
-      @font-face {
-        font-family: 'Beleren2016 Small Caps';
-        src: url('${fontUrlEscaped}') format('woff');
-        font-weight: 700;
-        font-style: normal;
-      }
-    </style>
-  </defs>
-  <rect x="0" y="0" width="${width}" height="${height}" rx="${cardRadius}" ry="${cardRadius}" fill="${options.backgroundColor ?? '#ffffff'}"/>
-  ${iconGroup}
-  ${textEls}
-  ${borderRect}
-</svg>`
-}
-
-/** Trigger download of the card as an SVG file. */
-export function downloadSvg(svgString: string, filename = 'drawer-label.svg') {
-  const blob = new Blob([svgString], { type: 'image/svg+xml' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url

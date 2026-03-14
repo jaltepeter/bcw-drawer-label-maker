@@ -1,6 +1,6 @@
 # BCW Drawer Label Maker
 
-Web app to create drawer front labels for a trading card catalog. Labels are **MTG card size** (2.5″ × 3.5″) at **300 DPI** so you can print them and use **Print then Cut** in Cricut Design Studio (or print on cardstock and trim).
+Web app to create drawer front labels for a trading card catalog. Labels are **toploader insert size** (2.68″ × 3.58″) at **300 DPI** so they fit centered in a toploader; use **Print then Cut** in Cricut Design Studio or print on cardstock and trim.
 
 - Pick an icon from **mana/ability symbols** via **[Mana](https://github.com/andrewgioia/mana)** (curated list; SVGs from jsDelivr CDN).
 - Label text uses **Beleren2016 Small Caps Bold** (local font in `public/fonts/`).
@@ -15,7 +15,7 @@ npm install
 npm run dev
 ```
 
-Open the URL shown (e.g. http://localhost:5173). Use **Download PNG** to save a 750×1050 px image for Cricut/printing.
+Open the URL shown (e.g. http://localhost:5173). Use **Download PNG** to save an 804×1074 px image (at 300 DPI) for Cricut/printing.
 
 **Build for production:**
 
