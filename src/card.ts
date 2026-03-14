@@ -17,6 +17,8 @@ export interface CardOptions {
   line1Color?: string
   line2Color?: string
   line3Color?: string
+  /** Card background color (e.g. #ffffff). */
+  backgroundColor?: string
 }
 
 /** Load an SVG string as an Image for drawing on canvas. */
@@ -64,7 +66,7 @@ async function waitForFonts(): Promise<void> {
 const fontSize = 84
 const textFontFamily = '"Beleren2016 Small Caps", serif'
 
-/** Draw card layout into a context (for preview or export). Scale 1 = 750×1050. */
+/** Draw card layout into a context (for preview or export). Scale 1 = CARD_WIDTH_PX × CARD_HEIGHT_PX. */
 async function drawCard(
   ctx: CanvasRenderingContext2D,
   width: number,
@@ -76,6 +78,14 @@ async function drawCard(
   const s = scale
   const layout = getCardLayout(width, height)
   ctx.clearRect(0, 0, width, height)
+  const radiusPx = (BORDER_RADIUS_MM / 25.4) * (width / CARD_WIDTH_IN)
+  const cardRadius = Math.min(radiusPx, width / 2, height / 2)
+  ctx.save()
+  ctx.beginPath()
+  ctx.roundRect(0, 0, width, height, cardRadius)
+  ctx.fillStyle = options.backgroundColor ?? '#ffffff'
+  ctx.fill()
+  ctx.clip()
   const contentWidth = layout.contentWidth
   const show2 = options.showLine2 !== false
   const show3 = options.showLine3 !== false
@@ -99,7 +109,8 @@ async function drawCard(
     )
   }
 
-  const textAreaTop = layout.textStartY
+  // Text centered in the band from bottom of icon to bottom of card
+  const textAreaTop = layout.iconZoneHeight
   const textAreaBottom = height - layout.padding
   const textAreaHeight = textAreaBottom - textAreaTop
   const blockHeight = lines.length * layout.lineHeight
@@ -131,6 +142,8 @@ async function drawCard(
     lineY += layout.lineHeight
   }
 
+  ctx.restore()
+
   if (options.showBorder) {
     const borderWidth = Math.max(1, 3 * s)
     const half = borderWidth / 2
@@ -146,7 +159,50 @@ async function drawCard(
   }
 }
 
-/** Create an offscreen canvas, draw the card, return as PNG blob. */
+/** PNG CRC-32 (used for chunk checksum). */
+function pngCrc32(data: Uint8Array): number {
+  let crc = 0xffffffff
+  const table = new Uint32Array(256)
+  for (let n = 0; n < 256; n++) {
+    let c = n
+    for (let k = 0; k < 8; k++) c = (c & 1) ? 0xedb88320 ^ (c >>> 1) : c >>> 1
+    table[n] = c >>> 0
+  }
+  for (let i = 0; i < data.length; i++) crc = table[(crc ^ data[i]) & 0xff] ^ (crc >>> 8)
+  return (crc ^ 0xffffffff) >>> 0
+}
+
+/** Insert pHYs chunk (pixels per meter) so the PNG reports correct DPI when opened in Cricut/print software. */
+async function pngWithDpi(blob: Blob, dpi: number): Promise<Blob> {
+  const buf = await blob.arrayBuffer()
+  const arr = new Uint8Array(buf)
+  const signatureAndIhdrLen = 8 + 4 + 4 + 13 + 4 // signature + IHDR chunk (length+type+data+crc)
+  if (arr.length < signatureAndIhdrLen) return blob // too small (e.g. test mock), skip
+  const ppm = Math.round(dpi / 0.0254) // pixels per meter
+  const physData = new Uint8Array(9)
+  const view = new DataView(physData.buffer)
+  view.setUint32(0, ppm, false)
+  view.setUint32(4, ppm, false)
+  physData[8] = 1 // unit: meter
+  const chunkType = new TextEncoder().encode('pHYs')
+  const chunkPayload = new Uint8Array(4 + 9) // type + data
+  chunkPayload.set(chunkType, 0)
+  chunkPayload.set(physData, 4)
+  const crc = pngCrc32(chunkPayload)
+  const chunk = new Uint8Array(4 + 4 + 9 + 4) // length + type + data + crc
+  const chunkView = new DataView(chunk.buffer)
+  chunkView.setUint32(0, 9, false)
+  chunk.set(chunkType, 4)
+  chunk.set(physData, 8)
+  chunkView.setUint32(17, crc, false)
+  const out = new Uint8Array(signatureAndIhdrLen + chunk.length + arr.length - signatureAndIhdrLen)
+  out.set(arr.subarray(0, signatureAndIhdrLen), 0)
+  out.set(chunk, signatureAndIhdrLen)
+  out.set(arr.subarray(signatureAndIhdrLen), signatureAndIhdrLen + chunk.length)
+  return new Blob([out], { type: 'image/png' })
+}
+
+/** Create an offscreen canvas, draw the card, return as PNG blob with DPI set so physical size is exact. */
 export async function renderCardToBlob(options: CardOptions): Promise<Blob> {
   const dpi = options.exportDpi ?? 300
   const { width, height } = getExportDimensions(dpi)
@@ -157,13 +213,14 @@ export async function renderCardToBlob(options: CardOptions): Promise<Blob> {
   if (!ctx) throw new Error('Canvas 2d not available')
   const scale = width / CARD_WIDTH_PX
   await drawCard(ctx, width, height, options, scale)
-  return new Promise<Blob>((resolve, reject) => {
+  const rawBlob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error('toBlob failed'))),
       'image/png',
       1
     )
   })
+  return pngWithDpi(rawBlob, dpi)
 }
 
 /** Draw preview into an existing canvas (e.g. 225×315). */

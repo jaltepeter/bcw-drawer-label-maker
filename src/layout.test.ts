@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import { getCardLayout } from './layout'
-import { CARD_WIDTH_PX, CARD_HEIGHT_PX } from './constants'
+import { CARD_WIDTH_PX, CARD_HEIGHT_PX, CARD_HEIGHT_IN, ICON_BOTTOM_MARGIN_IN } from './constants'
 
 describe('getCardLayout', () => {
   it('returns layout for full-size card', () => {
     const layout = getCardLayout(CARD_WIDTH_PX, CARD_HEIGHT_PX)
-    expect(layout.iconZoneHeight).toBe(CARD_HEIGHT_PX * (2 / 3))
+    const iconBottomY = CARD_HEIGHT_PX - ICON_BOTTOM_MARGIN_IN * (CARD_HEIGHT_PX / CARD_HEIGHT_IN)
+    expect(layout.iconZoneHeight).toBe(iconBottomY)
     expect(layout.textStartY).toBeGreaterThan(layout.iconZoneHeight)
     expect(layout.iconSize).toBeGreaterThan(0)
     expect(layout.iconX).toBeGreaterThanOrEqual(0)
@@ -14,9 +15,11 @@ describe('getCardLayout', () => {
     expect(layout.lineHeight).toBeGreaterThan(0)
   })
 
-  it('icon zone is top 2/3 of card height', () => {
+  it('icon bottom is ICON_BOTTOM_MARGIN_IN from card bottom', () => {
     const layout = getCardLayout(CARD_WIDTH_PX, CARD_HEIGHT_PX)
-    expect(layout.iconZoneHeight).toBe(700)
+    const iconBottomY = CARD_HEIGHT_PX - ICON_BOTTOM_MARGIN_IN * (CARD_HEIGHT_PX / CARD_HEIGHT_IN)
+    expect(layout.iconZoneHeight).toBe(iconBottomY)
+    expect(layout.iconY + layout.iconSize).toBe(iconBottomY)
   })
 
   it('three lines of text fit in bottom third', () => {
@@ -30,7 +33,8 @@ describe('getCardLayout', () => {
     const w = 225
     const h = 315
     const layout = getCardLayout(w, h)
-    expect(layout.iconZoneHeight).toBe(h * (2 / 3))
+    const iconBottomY = h - ICON_BOTTOM_MARGIN_IN * (h / CARD_HEIGHT_IN)
+    expect(layout.iconZoneHeight).toBe(iconBottomY)
     expect(layout.iconSize).toBeLessThanOrEqual(w)
     expect(layout.iconX + layout.iconSize).toBeLessThanOrEqual(w)
     expect(layout.contentWidth).toBeLessThanOrEqual(w)

@@ -1,13 +1,14 @@
+import { CARD_WIDTH_IN, CARD_HEIGHT_IN, MAX_ICON_SIZE_IN, ICON_BOTTOM_MARGIN_IN } from './constants'
+
 /**
  * Pure layout math for the card. Used by card.ts and by tests.
- * Card: top 2/3 = icon, bottom 1/3 = text (with padding).
- * All dimensions scale with canvas size (reference: 750px width).
+ * Icon: square, bottom edge at ICON_BOTTOM_MARGIN_IN from card bottom; size capped at MAX_ICON_SIZE_IN.
+ * Text: below icon with padding.
  */
-const REFERENCE_WIDTH = 750
+const REFERENCE_WIDTH = 804
 const PADDING = 60
 /** Top/bottom inset for icon zone; extra top room so symbol font doesn’t bleed. */
 const ICON_PADDING_TOP = 56
-const ICON_PADDING_BOTTOM = 40
 const LINE_HEIGHT = 86
 
 export interface CardLayout {
@@ -25,18 +26,21 @@ export function getCardLayout(width: number, height: number): CardLayout {
   const scale = width / REFERENCE_WIDTH
   const padding = PADDING * scale
   const iconPaddingTop = ICON_PADDING_TOP * scale
-  const iconPaddingBottom = ICON_PADDING_BOTTOM * scale
-  const iconZoneHeight = height * (2 / 3)
+  // Bottom of icon sits ICON_BOTTOM_MARGIN_IN from bottom of card
+  const iconBottomY = height - ICON_BOTTOM_MARGIN_IN * (height / CARD_HEIGHT_IN)
+  const maxIconHeight = iconBottomY - iconPaddingTop
+  const maxIconPx = (width / CARD_WIDTH_IN) * MAX_ICON_SIZE_IN
   const iconSize = Math.min(
     width - 2 * padding,
-    iconZoneHeight - iconPaddingTop - iconPaddingBottom
+    maxIconHeight,
+    maxIconPx
   )
   const iconX = (width - iconSize) / 2
-  const iconY = iconPaddingTop
-  const textStartY = iconZoneHeight + padding * 0.5
+  const iconY = iconBottomY - iconSize
+  const textStartY = iconBottomY + padding
   const contentWidth = width - 2 * padding
   return {
-    iconZoneHeight,
+    iconZoneHeight: iconBottomY,
     iconSize,
     iconX,
     iconY,
