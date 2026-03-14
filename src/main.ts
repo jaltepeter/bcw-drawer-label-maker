@@ -14,6 +14,8 @@ const LIGHTBOX_SCALE = 0.67
 const lightboxWidth = Math.round(CARD_WIDTH_PX * LIGHTBOX_SCALE)
 const lightboxHeight = Math.round(CARD_HEIGHT_PX * LIGHTBOX_SCALE)
 
+const DEFAULT_COLOR = '#000000'
+
 let state: CardOptions = {
   iconId: 'w',
   line1: '',
@@ -23,6 +25,10 @@ let state: CardOptions = {
   showLine3: true,
   showBorder: false,
   exportDpi: 300,
+  iconColor: DEFAULT_COLOR,
+  line1Color: DEFAULT_COLOR,
+  line2Color: DEFAULT_COLOR,
+  line3Color: DEFAULT_COLOR,
 }
 
 function getEl<T extends HTMLElement>(id: string): T {
@@ -121,6 +127,10 @@ function getDisplayOptions(): CardOptions {
     showLine2: state.showLine2,
     showLine3: state.showLine3,
     showBorder: state.showBorder,
+    iconColor: state.iconColor,
+    line1Color: state.line1Color,
+    line2Color: state.line2Color,
+    line3Color: state.line3Color,
   }
 }
 
@@ -162,6 +172,36 @@ function setupTextInputs() {
   line3.disabled = !showLine3.checked
   line3.addEventListener('input', () => {
     state.line3 = line3.value
+    renderPreview()
+  })
+}
+
+function setupColorPickers() {
+  const iconColor = getEl<HTMLInputElement>('icon-color')
+  iconColor.value = state.iconColor ?? DEFAULT_COLOR
+  iconColor.addEventListener('input', () => {
+    state.iconColor = iconColor.value
+    renderPreview()
+  })
+
+  const line1Color = getEl<HTMLInputElement>('line1-color')
+  line1Color.value = state.line1Color ?? DEFAULT_COLOR
+  line1Color.addEventListener('input', () => {
+    state.line1Color = line1Color.value
+    renderPreview()
+  })
+
+  const line2Color = getEl<HTMLInputElement>('line2-color')
+  line2Color.value = state.line2Color ?? DEFAULT_COLOR
+  line2Color.addEventListener('input', () => {
+    state.line2Color = line2Color.value
+    renderPreview()
+  })
+
+  const line3Color = getEl<HTMLInputElement>('line3-color')
+  line3Color.value = state.line3Color ?? DEFAULT_COLOR
+  line3Color.addEventListener('input', () => {
+    state.line3Color = line3Color.value
     renderPreview()
   })
 }
@@ -216,23 +256,36 @@ function init() {
         <fieldset class="fieldset">
           <legend>Icon</legend>
           <div id="icon-picker" class="icon-picker"></div>
+          <div class="color-row">
+            <label for="icon-color">Icon color</label>
+            <input type="color" id="icon-color" value="${state.iconColor ?? DEFAULT_COLOR}" aria-label="Icon color" />
+          </div>
         </fieldset>
         <fieldset class="fieldset">
           <legend>Text (up to 3 lines)</legend>
-          <input type="text" id="line1" class="text-input" maxlength="32" />
+          <div class="text-line-with-color">
+            <input type="text" id="line1" class="text-input" maxlength="32" />
+            <input type="color" id="line1-color" value="${state.line1Color ?? DEFAULT_COLOR}" aria-label="Line 1 color" class="line-color-input" />
+          </div>
           <div id="line2-row" class="text-line-row">
             <label class="line-toggle">
               <input type="checkbox" id="show-line2" checked />
               <span>Show line 2</span>
             </label>
-            <input type="text" id="line2" class="text-input" maxlength="32" />
+            <div class="text-line-with-color">
+              <input type="text" id="line2" class="text-input" maxlength="32" />
+              <input type="color" id="line2-color" value="${state.line2Color ?? DEFAULT_COLOR}" aria-label="Line 2 color" class="line-color-input" />
+            </div>
           </div>
           <div id="line3-row" class="text-line-row">
             <label class="line-toggle">
               <input type="checkbox" id="show-line3" checked />
               <span>Show line 3</span>
             </label>
-            <input type="text" id="line3" class="text-input" maxlength="32" />
+            <div class="text-line-with-color">
+              <input type="text" id="line3" class="text-input" maxlength="32" />
+              <input type="color" id="line3-color" value="${state.line3Color ?? DEFAULT_COLOR}" aria-label="Line 3 color" class="line-color-input" />
+            </div>
           </div>
         </fieldset>
         <div class="border-toggle-row">
@@ -276,6 +329,7 @@ function init() {
   `
   setupIconPicker()
   setupTextInputs()
+  setupColorPickers()
   setupBorderToggle()
   setupDpiSelect()
   setupDownload()

@@ -12,6 +12,11 @@ export interface CardOptions {
   showBorder?: boolean
   /** Export resolution (DPI). Default 300. */
   exportDpi?: number
+  /** Hex colors for icon and each text line (e.g. #000000). */
+  iconColor?: string
+  line1Color?: string
+  line2Color?: string
+  line3Color?: string
 }
 
 /** Load an SVG string as an Image for drawing on canvas. */
@@ -32,19 +37,20 @@ function loadSvgAsImage(svg: string): Promise<HTMLImageElement> {
   })
 }
 
-/** Force SVG to render in black (for card output). */
-function svgToBlack(svg: string): string {
+/** Set SVG fill and stroke to a given hex color. */
+function svgToColor(svg: string, color: string): string {
+  const hex = color.startsWith('#') ? color : `#${color}`
   return svg
-    .replace(/\bfill="[^"]*"/gi, 'fill="#000"')
-    .replace(/\bstroke="[^"]*"/gi, 'stroke="#000"')
+    .replace(/\bfill="[^"]*"/gi, `fill="${hex}"`)
+    .replace(/\bstroke="[^"]*"/gi, `stroke="${hex}"`)
 }
 
-/** Fetch SVG from URL and load as Image (avoids canvas taint). Icons are forced to black. */
-async function loadSvgFromUrl(url: string): Promise<HTMLImageElement> {
+/** Fetch SVG from URL and load as Image (avoids canvas taint). Icon uses given color. */
+async function loadSvgFromUrl(url: string, color: string): Promise<HTMLImageElement> {
   const res = await fetch(url)
   if (!res.ok) throw new Error(`Failed to fetch icon: ${res.status}`)
   let svgText = await res.text()
-  svgText = svgToBlack(svgText)
+  svgText = svgToColor(svgText, color)
   return loadSvgAsImage(svgText)
 }
 
@@ -80,9 +86,10 @@ async function drawCard(
   ].filter(Boolean) as string[]
   const hasIcon = options.iconId && getIconUrl(options.iconId as IconId)
 
+  const iconColor = options.iconColor ?? '#000000'
   if (hasIcon && options.iconId) {
     const url = getIconUrl(options.iconId as IconId)
-    const img = await loadSvgFromUrl(url)
+    const img = await loadSvgFromUrl(url, iconColor)
     ctx.drawImage(
       img,
       layout.iconX,
@@ -98,15 +105,21 @@ async function drawCard(
   const blockHeight = lines.length * layout.lineHeight
   const y = textAreaTop + (textAreaHeight - blockHeight) / 2
 
-  ctx.fillStyle = '#000'
+  const lineColors = [
+    options.line1Color ?? '#000000',
+    options.line2Color ?? '#000000',
+    options.line3Color ?? '#000000',
+  ]
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
   const fs = fontSize * s
   ctx.font = `600 ${fs}px ${textFontFamily}`
 
   let lineY = y
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
     if (lineY + layout.lineHeight > textAreaBottom) break
+    ctx.fillStyle = lineColors[i] ?? '#000000'
     let font = fs
     let metrics = ctx.measureText(line)
     while (metrics.width > contentWidth && font > 16) {
