@@ -1,0 +1,20 @@
+# GitVersion config: main = release versions, other branches = pre-release (e.g. 0.1.0-svg-instead.1)
+# See https://gitversion.net/docs/reference/configuration
+
+workflow: GitHubFlow/v1
+next-version: 0.1.0
+tag-prefix: '[vV]?'
+
+branches:
+  main:
+    label: ''
+    increment: Patch
+    regex: ^master$|^main$
+    is-main-branch: true
+  unknown:
+    # Any branch not matching above (e.g. svg-instead, feature/foo): pre-release with branch name
+    label: '{BranchName}'
+    increment: Inherit
+    regex: (?<BranchName>.+)
+    source-branches:
+      - main
