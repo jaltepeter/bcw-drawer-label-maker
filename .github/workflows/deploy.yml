@@ -31,7 +31,9 @@ jobs:
 
       - name: Set version env
         run: |
-          echo "VITE_APP_VERSION=${{ steps.gitversion.outputs.GitVersion_SemVer }}" >> $GITHUB_ENV
+          # Use Major.Minor.CommitsSinceVersionSource (e.g. 0.1.15) instead of SemVer (0.1.0-15)
+          PATCH="${{ steps.gitversion.outputs.GitVersion_CommitsSinceVersionSource }}"
+          echo "VITE_APP_VERSION=${{ steps.gitversion.outputs.GitVersion_Major }}.${{ steps.gitversion.outputs.GitVersion_Minor }}.${PATCH:-0}" >> $GITHUB_ENV
           echo "VITE_GIT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
 
       - name: Set up Node.js
