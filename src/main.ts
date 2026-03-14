@@ -259,7 +259,7 @@ function init() {
     <span aria-hidden="true" style="position:absolute;left:-9999px;font:700 1px &quot;Beleren2016 Small Caps&quot;,serif">.</span>
     <header class="header">
       <h1>Drawer Label Maker</h1>
-      <p class="subtitle">Toploader insert labels for BCW catalog · 2.68″ × 3.58″ @ 300 DPI</p>
+      <p class="subtitle">Drawer front labels for the <a href="https://www.bcwsupplies.com/6-drawer-card-catalog-black" target="_blank" rel="noopener noreferrer" class="subtitle-link">BCW 6-Drawer Card Catalog</a> · 2.68″ × 3.58″ @ 300 DPI</p>
     </header>
     <main class="main">
       <section class="controls">
@@ -298,24 +298,37 @@ function init() {
             </div>
           </div>
         </fieldset>
-        <div class="border-toggle-row">
-          <label class="line-toggle">
-            <input type="checkbox" id="show-border" />
-            <span>Show border</span>
-          </label>
+        <div class="options-block">
+          <div class="options-row options-row-split">
+            <label class="line-toggle" for="show-border">
+              <input type="checkbox" id="show-border" />
+              <span>Show border</span>
+            </label>
+            <div class="options-row-item">
+              <label for="bg-color" class="options-label">Background</label>
+              <input type="color" id="bg-color" value="${state.backgroundColor ?? DEFAULT_BG_COLOR}" aria-label="Background color" class="options-color" />
+            </div>
+          </div>
+          <div class="options-row">
+            <label for="export-dpi" class="options-label">Export resolution</label>
+            <select id="export-dpi" class="dpi-select" aria-describedby="export-dpi-desc">
+              ${EXPORT_DPI_OPTIONS.map((dpi) => `<option value="${dpi}">${dpi} DPI</option>`).join('')}
+            </select>
+            <span id="export-dpi-desc" class="dpi-desc">Higher DPI = larger file, sharper print.</span>
+          </div>
+          <button type="button" id="download-btn" class="download-btn" data-label="Download PNG" data-loading="Generating…">Download PNG</button>
         </div>
-        <div class="color-row">
-          <label for="bg-color">Background color</label>
-          <input type="color" id="bg-color" value="${state.backgroundColor ?? DEFAULT_BG_COLOR}" aria-label="Background color" />
-        </div>
-        <div class="dpi-row">
-          <label for="export-dpi">Export resolution</label>
-          <select id="export-dpi" class="dpi-select" aria-describedby="export-dpi-desc">
-            ${EXPORT_DPI_OPTIONS.map((dpi) => `<option value="${dpi}">${dpi} DPI</option>`).join('')}
-          </select>
-          <span id="export-dpi-desc" class="dpi-desc">Higher DPI = larger file, sharper print.</span>
-        </div>
-        <button type="button" id="download-btn" class="download-btn" data-label="Download PNG" data-loading="Generating…">Download PNG</button>
+        <details class="printing-tips">
+          <summary>Printing tips</summary>
+          <div class="printing-tips-content">
+            <ul>
+              <li><strong>Size:</strong> Labels are 2.68″ × 3.58″ — sized for toploader inserts.</li>
+              <li><strong>Scale:</strong> Print at 100%. Do not “fit to page” or scale; the PNG has DPI set so Cricut and print dialogs use the correct size.</li>
+              <li><strong>Cricut:</strong> Use <strong>Print then Cut</strong>. Import the PNG; Design Space should read the dimensions. If the size is wrong, select the image on the canvas and set width to <strong>2.68″</strong> and height to <strong>3.58″</strong>. Use a mat and cardstock that matches your printer.</li>
+              <li><strong>Paper:</strong> Cardstock in the 65–80 lb range works well for drawer labels.</li>
+            </ul>
+          </div>
+        </details>
       </section>
       <section class="preview-section">
         <p class="preview-label">Preview</p>

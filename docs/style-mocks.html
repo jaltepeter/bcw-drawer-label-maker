@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drawer Label Maker — Style concepts (accent colors)</title>
+  <style>
+    body { margin: 0; font-size: 16px; }
+    .mock-page { min-height: 100vh; padding: 2rem 1.5rem; }
+    .mock-page + .mock-page { border-top: 3px dashed #999; }
+    .mock-title { font-family: system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #666; margin: 0 0 1rem 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ========== B — Sky blue (default) ========== -->
+  <div class="mock-page concept-b concept-b-blue">
+    <p class="mock-title">Concept B — Sky blue</p>
+    <div class="b-wrap">
+      <header class="b-header">
+        <h1>Drawer Label Maker</h1>
+        <p class="b-subtitle">Toploader insert labels for BCW catalog · 2.68″ × 3.58″ @ 300 DPI</p>
+      </header>
+      <main class="b-main">
+        <section class="b-controls">
+          <div class="b-block">
+            <h3 class="b-block-title">Icon</h3>
+            <div class="b-icon-picker">
+              <span class="b-icon-option b-selected"></span>
+              <span class="b-icon-option"></span>
+              <span class="b-icon-option"></span>
+              <span class="b-icon-option"></span>
+              <span class="b-icon-option"></span>
+              <span class="b-icon-option"></span>
+            </div>
+            <div class="b-row">
+              <span class="b-label">Icon color</span>
+              <span class="b-swatch"></span>
+            </div>
+          </div>
+          <div class="b-block">
+            <h3 class="b-block-title">Text (up to 3 lines)</h3>
+            <div class="b-text-line">
+              <input type="text" value="Creatures" class="b-input" readonly />
+              <span class="b-swatch"></span>
+            </div>
+            <label class="b-check"><input type="checkbox" checked /> Show line 2</label>
+            <div class="b-text-line">
+              <input type="text" value="A-Z" class="b-input" readonly />
+              <span class="b-swatch"></span>
+            </div>
+            <label class="b-check"><input type="checkbox" checked /> Show line 3</label>
+            <div class="b-text-line">
+              <input type="text" value="Common" class="b-input" readonly />
+              <span class="b-swatch"></span>
+            </div>
+          </div>
+          <div class="b-block b-block-compact">
+            <label class="b-check"><input type="checkbox" /> Show border</label>
+            <div class="b-row">
+              <span class="b-label">Background</span>
+              <span class="b-swatch"></span>
+            </div>
+          </div>
+          <div class="b-block b-block-compact">
+            <label class="b-label">Export resolution</label>
+            <select class="b-select"><option>300 DPI</option><option>600 DPI</option></select>
+            <span class="b-hint">Higher DPI = larger file, sharper print.</span>
+          </div>
+          <button type="button" class="b-download">Download PNG</button>
+        </section>
+        <section class="b-preview-section">
+          <div class="b-preview-card">
+            <div class="b-preview-inner">
+              <div class="b-preview-icon"></div>
+              <div class="b-preview-lines">
+                <span>Creatures</span>
+                <span>A-Z</span>
+                <span>Common</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer class="b-credits">
+        <p>v0.1.16 · abc1234 — Mana by Andrew Gioia</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========== B — Teal ========== -->
+  <div class="mock-page concept-b concept-b-teal">
+    <p class="mock-title">Concept B — Teal</p>
+    <div class="b-wrap">
+      <header class="b-header">
+        <h1>Drawer Label Maker</h1>
+        <p class="b-subtitle">Toploader insert labels for BCW catalog · 2.68″ × 3.58″ @ 300 DPI</p>
+      </header>
+      <main class="b-main">
+        <section class="b-controls">
+          <div class="b-block">
+            <h3 class="b-block-title">Icon</h3>
+            <div class="b-icon-picker">
+              <span class="b-icon-option b-selected"></span>
+              <span class="b-icon-option"></span>
+              <span class="b-icon-option"></span>
+              <span class="b-icon-option"></span>
+              <span class="b-icon-option"></span>
+              <span class="b-icon-option"></span>
+            </div>
+            <div class="b-row">
+              <span class="b-label">Icon color</span>
+              <span class="b-swatch"></span>
+            </div>
+          </div>
+          <div class="b-block">
+            <h3 class="b-block-title">Text (up to 3 lines)</h3>
+            <div class="b-text-line">
+              <input type="text" value="Creatures" class="b-input" readonly />
+              <span class="b-swatch"></span>
+            </div>
+            <label class="b-check"><input type="checkbox" checked /> Show line 2</label>
+            <div class="b-text-line">
+              <input type="text" value="A-Z" class="b-input" readonly />
+              <span class="b-swatch"></span>
+            </div>
+            <label class="b-check"><input type="checkbox" checked /> Show line 3</label>
+            <div class="b-text-line">
+              <input type="text" value="Common" class="b-input" readonly />
+              <span class="b-swatch"></span>
+            </div>
+          </div>
+          <div class="b-block b-block-compact">
+            <label class="b-check"><input type="checkbox" /> Show border</label>
+            <div class="b-row">
+              <span class="b-label">Background</span>
+              <span class="b-swatch"></span>
+            </div>
+          </div>
+          <div class="b-block b-block-compact">
+            <label class="b-label">Export resolution</label>
+            <select class="b-select"><option>300 DPI</option><option>600 DPI</option></select>
+            <span class="b-hint">Higher DPI = larger file, sharper print.</span>
+          </div>
+          <button type="button" class="b-download">Download PNG</button>
+        </section>
+        <section class="b-preview-section">
+          <div class="b-preview-card">
+            <div class="b-preview-inner">
+              <div class="b-preview-icon"></div>
+              <div class="b-preview-lines">
+                <span>Creatures</span>
+                <span>A-Z</span>
+                <span>Common</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer class="b-credits">
+        <p>v0.1.16 · abc1234 — Mana by Andrew Gioia</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========== B — Amber ========== -->
+  <div class="mock-page concept-b concept-b-amber">
+    <p class="mock-title">Concept B — Amber</p>
+    <div class="b-wrap">
+      <header class="b-header">
+        <h1>Drawer Label Maker</h1>
+        <p class="b-subtitle">Toploader insert labels for BCW catalog · 2.68″ × 3.58″ @ 300 DPI</p>
+      </header>
+      <main class="b-main">
+        <section class="b-controls">
+          <div class="b-block">
+            <h3 class="b-block-title">Icon</h3>
+            <div class="b-icon-picker">
+              <span class="b-icon-option b-selected"></span>
+              <span class="b-icon-option"></span>
+              <span class="b-icon-option"></span>
+              <span class="b-icon-option"></span>
+              <span class="b-icon-option"></span>
+              <span class="b-icon-option"></span>
+            </div>
+            <div class="b-row">
+              <span class="b-label">Icon color</span>
+              <span class="b-swatch"></span>
+            </div>
+          </div>
+          <div class="b-block">
+            <h3 class="b-block-title">Text (up to 3 lines)</h3>
+            <div class="b-text-line">
+              <input type="text" value="Creatures" class="b-input" readonly />
+              <span class="b-swatch"></span>
+            </div>
+            <label class="b-check"><input type="checkbox" checked /> Show line 2</label>
+            <div class="b-text-line">
+              <input type="text" value="A-Z" class="b-input" readonly />
+              <span class="b-swatch"></span>
+            </div>
+            <label class="b-check"><input type="checkbox" checked /> Show line 3</label>
+            <div class="b-text-line">
+              <input type="text" value="Common" class="b-input" readonly />
+              <span class="b-swatch"></span>
+            </div>
+          </div>
+          <div class="b-block b-block-compact">
+            <label class="b-check"><input type="checkbox" /> Show border</label>
+            <div class="b-row">
+              <span class="b-label">Background</span>
+              <span class="b-swatch"></span>
+            </div>
+          </div>
+          <div class="b-block b-block-compact">
+            <label class="b-label">Export resolution</label>
+            <select class="b-select"><option>300 DPI</option><option>600 DPI</option></select>
+            <span class="b-hint">Higher DPI = larger file, sharper print.</span>
+          </div>
+          <button type="button" class="b-download">Download PNG</button>
+        </section>
+        <section class="b-preview-section">
+          <div class="b-preview-card">
+            <div class="b-preview-inner">
+              <div class="b-preview-icon"></div>
+              <div class="b-preview-lines">
+                <span>Creatures</span>
+                <span>A-Z</span>
+                <span>Common</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer class="b-credits">
+        <p>v0.1.16 · abc1234 — Mana by Andrew Gioia</p>
+      </footer>
+    </div>
+  </div>
+
+  <style>
+    /* ---------- Concept B: shared layout (softer, darker greys) ---------- */
+    .concept-b { background: #d4d8de; --accent: #0ea5e9; --accent-dark: #0284c7; --accent-glow: rgba(14, 165, 233, 0.25); }
+    .concept-b-teal { --accent: #0d9488; --accent-dark: #0f766e; --accent-glow: rgba(13, 148, 136, 0.25); }
+    .concept-b-amber { --accent: #d97706; --accent-dark: #b45309; --accent-glow: rgba(217, 119, 6, 0.25); }
+
+    .b-wrap { max-width: 920px; margin: 0 auto; }
+    .b-header { text-align: center; margin-bottom: 2rem; }
+    .b-header h1 { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0 0 0.25rem 0; letter-spacing: -0.02em; }
+    .b-subtitle { font-size: 0.875rem; color: #475569; margin: 0; }
+    .b-main { display: grid; grid-template-columns: 1fr auto; gap: 2.5rem; align-items: start; }
+    .b-controls { display: flex; flex-direction: column; gap: 1.5rem; }
+    .b-block { background: #e4e6ea; border-radius: 10px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #c4c8ce; }
+    .b-block-compact { padding: 1rem 1.25rem; }
+    .b-block-title { font-size: 0.8125rem; font-weight: 600; color: #475569; margin: 0 0 0.75rem 0; text-transform: uppercase; letter-spacing: 0.04em; }
+    .b-icon-picker { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .b-icon-option { width: 40px; height: 40px; border-radius: 8px; background: #d8dce0; border: 1px solid #c4c8ce; }
+    .b-icon-option.b-selected { background: var(--accent); border-color: var(--accent-dark); box-shadow: 0 0 0 2px var(--accent-glow); }
+    .b-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
+    .b-label { font-size: 0.875rem; color: #475569; }
+    .b-swatch { width: 2rem; height: 1.5rem; border-radius: 6px; background: #1e293b; border: 1px solid #c4c8ce; }
+    .b-text-line { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
+    .b-input { flex: 1; padding: 0.5rem 0.75rem; border: 1px solid #c4c8ce; border-radius: 8px; background: #d8dce0; color: #1e293b; font-size: 0.9375rem; }
+    .b-check { font-size: 0.8125rem; color: #475569; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; cursor: pointer; }
+    .b-select { padding: 0.375rem 0.5rem; border: 1px solid #c4c8ce; border-radius: 8px; background: #d8dce0; color: #1e293b; margin-top: 0.25rem; }
+    .b-hint { font-size: 0.75rem; color: #475569; margin-top: 0.25rem; display: block; }
+    .b-download { padding: 0.75rem 1.5rem; font-size: 0.9375rem; font-weight: 600; color: #fff; background: var(--accent); border: none; border-radius: 10px; cursor: pointer; align-self: flex-start; box-shadow: 0 1px 3px var(--accent-glow); }
+    .b-download:hover { background: var(--accent-dark); }
+    .b-preview-section { display: flex; flex-direction: column; align-items: center; }
+    .b-preview-card { width: 225px; height: 315px; background: #e4e6ea; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; }
+    .b-preview-inner { text-align: center; }
+    .b-preview-icon { width: 72px; height: 72px; border-radius: 50%; background: #c4c8ce; margin: 0 auto 1rem; }
+    .b-preview-lines { font-size: 0.75rem; color: #475569; display: flex; flex-direction: column; gap: 0.25rem; }
+    .b-credits { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #c4c8ce; font-size: 0.75rem; color: #475569; }
+  </style>
+</body>
+</html>
