@@ -24,6 +24,8 @@ export interface CardOptions {
   line1Color?: string
   line2Color?: string
   line3Color?: string
+  /** Card background color (e.g. #ffffff). */
+  backgroundColor?: string
 }
 
 /** Load an SVG string as an Image for drawing on canvas. */
@@ -165,6 +167,14 @@ async function drawCard(
   const s = scale
   const layout = getCardLayout(width, height)
   ctx.clearRect(0, 0, width, height)
+  const radiusPx = (BORDER_RADIUS_MM / 25.4) * (width / CARD_WIDTH_IN)
+  const cardRadius = Math.min(radiusPx, width / 2, height / 2)
+  ctx.save()
+  ctx.beginPath()
+  ctx.roundRect(0, 0, width, height, cardRadius)
+  ctx.fillStyle = options.backgroundColor ?? '#ffffff'
+  ctx.fill()
+  ctx.clip()
   const contentWidth = layout.contentWidth
   const show2 = options.showLine2 !== false
   const show3 = options.showLine3 !== false
@@ -219,6 +229,8 @@ async function drawCard(
     ctx.fillText(line, width / 2, lineY, contentWidth)
     lineY += layout.lineHeight
   }
+
+  ctx.restore()
 
   if (options.showBorder) {
     const borderWidth = Math.max(1, 3 * s)
@@ -302,6 +314,7 @@ export async function renderCardToSvg(options: CardOptions): Promise<string> {
   const borderWidth = 3
   const half = borderWidth / 2
   const radiusPx = (BORDER_RADIUS_MM / 25.4) * (width / CARD_WIDTH_IN)
+  const cardRadius = Math.min(radiusPx, width / 2, height / 2)
   const radius = Math.min(radiusPx, (width - borderWidth) / 2, (height - borderWidth) / 2)
 
   let iconGroup = ''
@@ -346,7 +359,7 @@ export async function renderCardToSvg(options: CardOptions): Promise<string> {
       }
     </style>
   </defs>
-  <rect width="${width}" height="${height}" fill="white"/>
+  <rect x="0" y="0" width="${width}" height="${height}" rx="${cardRadius}" ry="${cardRadius}" fill="${options.backgroundColor ?? '#ffffff'}"/>
   ${iconGroup}
   ${textEls}
   ${borderRect}

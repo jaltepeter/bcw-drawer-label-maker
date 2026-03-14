@@ -15,6 +15,7 @@ const lightboxWidth = Math.round(CARD_WIDTH_PX * LIGHTBOX_SCALE)
 const lightboxHeight = Math.round(CARD_HEIGHT_PX * LIGHTBOX_SCALE)
 
 const DEFAULT_COLOR = '#000000'
+const DEFAULT_BG_COLOR = '#ffffff'
 
 let state: CardOptions = {
   iconId: 'w',
@@ -29,6 +30,7 @@ let state: CardOptions = {
   line1Color: DEFAULT_COLOR,
   line2Color: DEFAULT_COLOR,
   line3Color: DEFAULT_COLOR,
+  backgroundColor: DEFAULT_BG_COLOR,
 }
 
 function getEl<T extends HTMLElement>(id: string): T {
@@ -131,6 +133,7 @@ function getDisplayOptions(): CardOptions {
     line1Color: state.line1Color,
     line2Color: state.line2Color,
     line3Color: state.line3Color,
+    backgroundColor: state.backgroundColor,
   }
 }
 
@@ -204,6 +207,13 @@ function setupColorPickers() {
     state.line3Color = line3Color.value
     renderPreview()
   })
+
+  const bgColor = getEl<HTMLInputElement>('bg-color')
+  bgColor.value = state.backgroundColor ?? DEFAULT_BG_COLOR
+  bgColor.addEventListener('input', () => {
+    state.backgroundColor = bgColor.value
+    renderPreview()
+  })
 }
 
 function setupBorderToggle() {
@@ -231,7 +241,7 @@ function setupDownload() {
     btn.disabled = true
     btn.textContent = loadingText
     try {
-      const blob = await renderCardToBlob(state)
+      const blob = await renderCardToBlob(getDisplayOptions())
       const name = [state.line1 || 'label', state.iconId].filter(Boolean).join('-').replace(/\s+/g, '-') || 'drawer-label'
       downloadCard(blob, `${name}.png`)
     } catch (e) {
@@ -249,7 +259,7 @@ function setupDownload() {
     svgBtn.disabled = true
     svgBtn.textContent = svgLoadingText
     try {
-      const svg = await renderCardToSvg(state)
+      const svg = await renderCardToSvg(getDisplayOptions())
       const name = [state.line1 || 'label', state.iconId].filter(Boolean).join('-').replace(/\s+/g, '-') || 'drawer-label'
       downloadSvg(svg, `${name}.svg`)
     } catch (e) {
@@ -311,6 +321,10 @@ function init() {
             <input type="checkbox" id="show-border" />
             <span>Show border</span>
           </label>
+        </div>
+        <div class="color-row">
+          <label for="bg-color">Background color</label>
+          <input type="color" id="bg-color" value="${state.backgroundColor ?? DEFAULT_BG_COLOR}" aria-label="Background color" />
         </div>
         <div class="dpi-row">
           <label for="export-dpi">Export resolution</label>
