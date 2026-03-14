@@ -1,4 +1,4 @@
-import { CARD_WIDTH_PX, getExportDimensions } from './constants'
+import { CARD_WIDTH_PX, BORDER_RADIUS_MM, CARD_WIDTH_IN, getExportDimensions } from './constants'
 import { getIconUrl, type IconId } from './icons'
 import { getCardLayout } from './layout'
 
@@ -134,9 +134,15 @@ async function drawCard(
   if (options.showBorder) {
     const borderWidth = Math.max(1, 3 * s)
     const half = borderWidth / 2
+    const w = width - borderWidth
+    const h = height - borderWidth
+    const radiusPx = (BORDER_RADIUS_MM / 25.4) * (width / CARD_WIDTH_IN)
+    const radius = Math.min(radiusPx, w / 2, h / 2)
     ctx.strokeStyle = '#000'
     ctx.lineWidth = borderWidth
-    ctx.strokeRect(half, half, width - borderWidth, height - borderWidth)
+    ctx.beginPath()
+    ctx.roundRect(half, half, w, h, radius)
+    ctx.stroke()
   }
 }
 

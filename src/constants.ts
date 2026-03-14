@@ -11,6 +11,9 @@ export const CARD_HEIGHT_PX = Math.round(CARD_HEIGHT_IN * DPI)
 export const EXPORT_DPI_OPTIONS = [300, 600] as const
 export type ExportDpi = (typeof EXPORT_DPI_OPTIONS)[number]
 
+/** Border corner radius in mm when border is shown. */
+export const BORDER_RADIUS_MM = 2.5
+
 /** Pixel dimensions for export at the given DPI (same physical size). */
 export function getExportDimensions(dpi: number): { width: number; height: number } {
   return {

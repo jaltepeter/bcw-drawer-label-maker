@@ -12,7 +12,9 @@ function makeMockCanvas(): HTMLCanvasElement {
     drawImage: vi.fn(),
     fillText: vi.fn(),
     measureText: vi.fn(() => ({ width: 0 })),
-    strokeRect: vi.fn(),
+    beginPath: vi.fn(),
+    roundRect: vi.fn(),
+    stroke: vi.fn(),
     font: '',
     fillStyle: '',
     textAlign: '',
@@ -70,7 +72,7 @@ describe('renderCardToBlob', () => {
 
   it('draws border when showBorder is true', async () => {
     const mockCanvas = makeMockCanvas()
-    const ctx = mockCanvas.getContext('2d') as unknown as { strokeRect: ReturnType<typeof vi.fn> }
+    const ctx = mockCanvas.getContext('2d') as unknown as { roundRect: ReturnType<typeof vi.fn>; stroke: ReturnType<typeof vi.fn> }
     vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
       if (tagName.toLowerCase() === 'canvas') return mockCanvas
       return document.createElement(tagName as keyof HTMLElementTagNameMap)
@@ -84,7 +86,8 @@ describe('renderCardToBlob', () => {
     }
     const blob = await renderCardToBlob(options)
     expect(blob.type).toBe('image/png')
-    expect(ctx.strokeRect).toHaveBeenCalled()
+    expect(ctx.roundRect).toHaveBeenCalled()
+    expect(ctx.stroke).toHaveBeenCalled()
   })
 })
 
